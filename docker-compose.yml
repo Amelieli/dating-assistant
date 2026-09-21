@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Python Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dating-orchestrator-backend
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: development
+      FLASK_APP: api.py
+    volumes:
+      - ./backend:/app
+      - ./logs:/app/logs
+      - dating-cache:/app/.cache
+    command: python api.py
+    networks:
+      - dating-network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dating-orchestrator-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_URL: "http://localhost:5000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - dating-network
+    depends_on:
+      - backend
+
+volumes:
+  dating-cache:
+
+networks:
+  dating-network:
+    driver: bridge

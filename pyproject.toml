@@ -1,0 +1,14 @@
+[project]
+name = "dating-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "flask>=3.1.3",
+    "flask-cors>=6.0.5",
+    "mitmproxy",
+    "numpy>=2.5.3",
+    "pillow>=12.3.0",
+    "requests>=2.34.2",
+]

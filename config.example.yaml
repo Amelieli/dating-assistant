@@ -1,0 +1,73 @@
+# Dating Apps Orchestrator Configuration Example
+# Copy to config.yaml and fill in your details
+
+# Dating App Credentials
+tinder:
+  # Method 1: Facebook Token (recommended)
+  facebook_token: "your_facebook_token_here"
+  # OR Method 2: Phone-based auth
+  phone: "+1234567890"
+
+hinge:
+  # Usually a session token from browser inspector
+  session_token: "your_hinge_session_token"
+  # Browser User-Agent for scraping
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+match:
+  username: "your_match_email@example.com"
+  password: "your_match_password"
+
+# Filtering Preferences
+filters:
+  min_age: 25
+  max_age: 40
+  max_distance_km: 50
+  
+  # Lifestyle
+  must_not_smoke: true
+  must_not_use_drugs: true
+  min_drink_level: "socially"  # "no", "socially", "often"
+  
+  # Interests
+  min_interest_overlap: 1
+  required_interests:
+    - hiking
+    - travel
+    - photography
+  
+  blocked_interests:
+    - party
+  
+  # Religion/Politics (optional)
+  acceptable_religions:
+    - atheist
+    - agnostic
+    - christian
+  
+  acceptable_politics:
+    - liberal
+    - progressive
+
+# CLIP Image Matching
+clip:
+  enabled: true
+  similarity_threshold: 0.7  # 0-1, higher = stricter matching
+  device: "cuda"  # "cuda" or "cpu"
+
+# API Server
+api:
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+  cors_enabled: true
+
+# Frontend
+frontend:
+  port: 3000
+  api_url: "http://localhost:5000"
+
+# Logging
+logging:
+  level: "INFO"
+  file: "logs/orchestrator.log"

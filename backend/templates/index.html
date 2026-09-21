@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dating Agent - Orchestrator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header {
+            background: rgba(30, 30, 46, 0.95);
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 { color: #8b5cf6; font-size: 24px; }
+        .subtitle { color: #a0a0a0; font-size: 13px; }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(30, 30, 46, 0.8);
+            color: #a0a0a0;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: rgba(139, 92, 246, 0.2);
+            color: #e0e0e0;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+        
+        .stat-box .number { font-size: 28px; font-weight: bold; }
+        .stat-box .label { font-size: 12px; opacity: 0.9; }
+        
+        /* Filter Bar */
+        .filter-bar {
+            background: rgba(30, 30, 46, 0.95);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-group label {
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+        
+        .filter-group input, .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            font-size: 13px;
+            width: 80px;
+        }
+        
+        .filter-group select { width: 120px; }
+        
+        .btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover { transform: translateY(-2px); }
+        .btn-sm { padding: 8px 16px; font-size: 12px; }
+        
+        /* Profile Grid */
+        .profiles {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        .profile-card {
+            background: rgba(30, 30, 46, 0.95);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+        }
+        
+        .profile-card.flagged {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+        
+        .profile-photo {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            object-position: top center;
+            background: #2a2a4a;
+        }
+        
+        /* Photo Collage */
+        .photo-collage {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 2px;
+            height: 280px;
+            background: #2a2a4a;
+        }
+        
+        .photo-collage .main-photo {
+            grid-row: 1 / 3;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top center;
+        }
+        
+        .photo-collage .side-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top center;
+        }
+        
+        .photo-collage .more-photos {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .profile-body { padding: 15px; }
+        
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .profile-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e0e0e0;
+        }
+        
+        .profile-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-match { background: #10b981; color: white; }
+        .badge-like { background: #8b5cf6; color: white; }
+        
+        /* Structured Data Grid */
+        .profile-data {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .data-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        .data-item .label {
+            color: #888;
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        
+        .data-item .value {
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+        
+        .data-item.flagged {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+        
+        .data-item.flagged .value {
+            color: #fca5a5;
+        }
+        
+        .data-item.good {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+        
+        .data-item.good .value {
+            color: #86efac;
+        }
+        
+        .profile-bio {
+            font-size: 12px;
+            color: #a0a0a0;
+            line-height: 1.4;
+            max-height: 60px;
+            overflow: hidden;
+        }
+        
+        /* Card for Settings */
+        .card {
+            background: rgba(30, 30, 46, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .card h2 {
+            color: #e0e0e0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #8b5cf6;
+            font-size: 18px;
+        }
+        
+        .form-group { margin-bottom: 15px; }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #a0a0a0;
+            font-size: 13px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        
+        .status.success { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
+        .status.error { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .status.info { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
+        
+        .hidden { display: none; }
+        .loading { text-align: center; padding: 40px; color: #8b5cf6; }
+        
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #a78bfa;
+            font-size: 12px;
+        }
+        
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        @media (max-width: 768px) {
+            .two-col { grid-template-columns: 1fr; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Dating Agent Orchestrator</h1>
+                <p class="subtitle">Aggregate and filter profiles from Tinder, Hinge, and Match</p>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-box">
+                    <div class="number" id="totalProfiles">0</div>
+                    <div class="label">Total</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="incomingLikes">0</div>
+                    <div class="label">Likes You</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="mutualMatches">0</div>
+                    <div class="label">Matches</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn" onclick="switchTab('top')" id="tab-btn-top">Top 20 Matches</button>
+            <button class="tab-btn active" onclick="switchTab('profiles')">All Profiles</button>
+            <button class="tab-btn" onclick="switchTab('settings')">Settings & Auth</button>
+        </div>
+        
+        <!-- Tab 0: Top Matches -->
+        <div id="tab-top" class="tab-content">
+            <div class="card" style="margin-bottom:20px;">
+                <h2 style="border:none;margin:0;padding:0;">Top 20 Ranked Matches</h2>
+                <p style="color:#888;font-size:13px;margin-top:5px;">Ranked by: Mutual matches, Verified profiles, Profile completeness, Distance, Age range</p>
+            </div>
+            
+            <!-- Ranking Config -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>Show Top:</label>
+                    <select id="topN">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Age:</label>
+                    <input type="number" id="rankMinAge" value="25" min="18" max="100" style="width:60px;">
+                    <span style="color:#666;">-</span>
+                    <input type="number" id="rankMaxAge" value="45" min="18" max="100" style="width:60px;">
+                </div>
+                <div class="filter-group">
+                    <label>Max Distance:</label>
+                    <input type="number" id="rankMaxDistance" value="50" min="1" style="width:60px;"> km
+                </div>
+                <div class="filter-group">
+                    <label>No Smokers:</label>
+                    <select id="rankNoSmoke">
+                        <option value="true" selected>Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+                <button class="btn btn-sm" onclick="loadTopMatches()">Rank Profiles</button>
+            </div>
+            
+            <!-- Top Matches Grid -->
+            <div id="topMatchesContainer" class="profiles">
+                <div class="loading">Click "Rank Profiles" to see your top matches!</div>
+            </div>
+        </div>
+        
+        <!-- Tab 1: Profiles -->
+        <div id="tab-profiles" class="tab-content active">
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>Age:</label>
+                    <input type="number" id="filterMinAge" value="25" min="18" max="100">
+                    <span style="color:#666;">-</span>
+                    <input type="number" id="filterMaxAge" value="45" min="18" max="100">
+                </div>
+                <div class="filter-group">
+                    <label>Max Distance:</label>
+                    <input type="number" id="filterMaxDistance" value="50" min="1"> km
+                </div>
+                <div class="filter-group">
+                    <label>Smoking:</label>
+                    <select id="filterSmoke">
+                        <option value="any">Any</option>
+                        <option value="no" selected>No Smoking</option>
+                        <option value="yes">Smokers OK</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Verified:</label>
+                    <select id="filterVerified">
+                        <option value="any" selected>Any</option>
+                        <option value="yes">Verified Only</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Ethnicity:</label>
+                    <select id="filterEthnicity" style="width:140px;">
+                        <option value="any" selected>Any</option>
+                        <option value="asian">Asian</option>
+                        <option value="black">Black</option>
+                        <option value="hispanic">Hispanic/Latino</option>
+                        <option value="white">White</option>
+                        <option value="middle_eastern">Middle Eastern</option>
+                        <option value="native">Native American</option>
+                        <option value="pacific">Pacific Islander</option>
+                        <option value="has_ethnicity">Has Ethnicity Data</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>App:</label>
+                    <select id="filterApp">
+                        <option value="any" selected>Any</option>
+                        <option value="tinder">Tinder</option>
+                        <option value="hinge">Hinge</option>
+                    </select>
+                </div>
+                <button class="btn btn-sm" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn btn-sm" style="background:#4b5563;" onclick="loadProfiles()">Refresh</button>
+            </div>
+            
+            <!-- Profiles Grid -->
+            <div id="profilesContainer" class="profiles">
+                <div class="loading">Loading profiles...</div>
+            </div>
+        </div>
+        
+        <!-- Tab 2: Settings & Auth -->
+        <div id="tab-settings" class="tab-content">
+            <div class="two-col">
+                <!-- Tinder Section -->
+                <div class="card">
+                    <h2>Tinder (Recommended)</h2>
+                    <div class="status info">
+                        <strong>Status:</strong> Connected via mitmproxy<br>
+                        Run <code>python tinder_fetcher_v2.py</code> to fetch data
+                    </div>
+                    <div class="form-group">
+                        <label>Auth Token (from mitmproxy)</label>
+                        <input type="text" id="tinderToken" placeholder="x-auth-token value">
+                    </div>
+                    <button class="btn" onclick="saveTinderToken()">Save Token</button>
+                </div>
+                
+                <!-- Hinge Section -->
+                <div class="card">
+                    <h2>Hinge (Mobile Only)</h2>
+                    <div class="status info">
+                        <strong>Note:</strong> Hinge requires mobile app interception.<br>
+                        Use mitmproxy to capture the auth token.
+                    </div>
+                    
+                    <div id="hingeAuthStatus"></div>
+                    
+                    <div id="hingeAuthForm">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="phoneNumber" placeholder="+1-555-123-4567">
+                        </div>
+                        <button class="btn" onclick="requestHingeOTP()" id="hingeRequestBtn">Request SMS Code</button>
+                    </div>
+                    
+                    <div id="hingeOtpForm" class="hidden">
+                        <div class="form-group">
+                            <label>Enter SMS Code</label>
+                            <input type="text" id="otpCode" placeholder="123456" maxlength="6">
+                        </div>
+                        <button class="btn" onclick="verifyHingeOTP()" id="hingeVerifyBtn">Verify</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filter Settings -->
+            <div class="card">
+                <h2>Default Filter Settings</h2>
+                <div class="two-col">
+                    <div>
+                        <div class="form-group">
+                            <label>Minimum Age</label>
+                            <input type="number" id="settingMinAge" value="25">
+                        </div>
+                        <div class="form-group">
+                            <label>Maximum Age</label>
+                            <input type="number" id="settingMaxAge" value="45">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Distance (km)</label>
+                            <input type="number" id="settingMaxDistance" value="50">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label>Must Not Smoke</label>
+                            <select id="settingNoSmoke">
+                                <option value="true" selected>Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Must Not Use Drugs</label>
+                            <select id="settingNoDrugs">
+                                <option value="true" selected>Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Must Be Verified</label>
+                            <select id="settingVerified">
+                                <option value="false" selected>No</option>
+                                <option value="true">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Filter settings (defaults)
+        let filterSettings = {
+            minAge: 25,
+            maxAge: 45,
+            maxDistance: 50,
+            mustNotSmoke: true,
+            mustNotUseDrugs: true,
+            mustBeVerified: false,
+            ethnicity: 'any',
+            app: 'any'
+        };
+        
+        // Load settings from localStorage
+        const savedSettings = localStorage.getItem('filterSettings');
+        if (savedSettings) {
+            filterSettings = JSON.parse(savedSettings);
+            document.getElementById('filterMinAge').value = filterSettings.minAge;
+            document.getElementById('filterMaxAge').value = filterSettings.maxAge;
+            document.getElementById('filterMaxDistance').value = filterSettings.maxDistance;
+        }
+        
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+        
+        // Load stats and profiles on page load
+        window.onload = function() {
+            loadStats();
+            loadProfiles();
+        };
+        
+        async function loadStats() {
+            try {
+                const response = await fetch('/stats');
+                const data = await response.json();
+                
+                document.getElementById('totalProfiles').textContent = data.total_profiles || 0;
+                document.getElementById('mutualMatches').textContent = data.mutual_matches || 0;
+                document.getElementById('incomingLikes').textContent = data.incoming_likes || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        async function loadProfiles() {
+            const container = document.getElementById('profilesContainer');
+            container.innerHTML = '<div class="loading">Loading profiles...</div>';
+            
+            try {
+                const [mutualRes, incomingRes] = await Promise.all([
+                    fetch('/matches/mutual'),
+                    fetch('/matches/incoming')
+                ]);
+                
+                const mutualData = await mutualRes.json();
+                const incomingData = await incomingRes.json();
+                
+                let allProfiles = [
+                    ...(mutualData.matches || []).map(p => ({...p, _type: 'match'})),
+                    ...(incomingData.likes || []).map(p => ({...p, _type: 'like'}))
+                ];
+                
+                // Apply filters
+                if (filterSettings.ethnicity && filterSettings.ethnicity !== 'any') {
+                    if (filterSettings.ethnicity === 'has_ethnicity') {
+                        // Filter to only profiles that have ethnicity data
+                        allProfiles = allProfiles.filter(p => p.ethnicity && p.ethnicity !== 'Unknown');
+                    } else {
+                        const ethMap = {
+                            'asian': ['asian', 'east asian', 'south asian'],
+                            'black': ['black'],
+                            'hispanic': ['hispanic', 'latino', 'latina'],
+                            'white': ['white', 'caucasian'],
+                            'middle_eastern': ['middle eastern'],
+                            'native': ['native american', 'native'],
+                            'pacific': ['pacific islander', 'pacific'],
+                            'other': ['other']
+                        };
+                        const targetEths = ethMap[filterSettings.ethnicity] || [];
+                        allProfiles = allProfiles.filter(p => {
+                            const eth = (p.ethnicity || '').toLowerCase();
+                            return targetEths.some(t => eth.includes(t));
+                        });
+                    }
+                }
+                
+                if (filterSettings.app && filterSettings.app !== 'any') {
+                    allProfiles = allProfiles.filter(p => p.app_source === filterSettings.app);
+                }
+                
+                // Filter by age
+                allProfiles = allProfiles.filter(p => {
+                    if (!p.age) return true;
+                    return p.age >= filterSettings.minAge && p.age <= filterSettings.maxAge;
+                });
+                
+                if (allProfiles.length > 0) {
+                    container.innerHTML = '';
+                    allProfiles.forEach(profile => {
+                        const card = createProfileCard(profile);
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = '<div class="loading">No profiles yet. Run hydrate_app.py to load data!</div>';
+                }
+            } catch (error) {
+                container.innerHTML = '<div class="loading">Error loading profiles: ' + error.message + '</div>';
+            }
+        }
+        
+        function applyFilters() {
+            filterSettings.minAge = parseInt(document.getElementById('filterMinAge').value) || 18;
+            filterSettings.maxAge = parseInt(document.getElementById('filterMaxAge').value) || 100;
+            filterSettings.maxDistance = parseInt(document.getElementById('filterMaxDistance').value) || 100;
+            filterSettings.mustNotSmoke = document.getElementById('filterSmoke').value === 'no';
+            filterSettings.mustBeVerified = document.getElementById('filterVerified').value === 'yes';
+            filterSettings.ethnicity = document.getElementById('filterEthnicity').value;
+            filterSettings.app = document.getElementById('filterApp').value;
+            
+            // Re-render profiles with new filter highlighting
+            loadProfiles();
+        }
+        
+        async function loadTopMatches() {
+            const container = document.getElementById('topMatchesContainer');
+            container.innerHTML = '<div class="loading">Ranking profiles...</div>';
+            
+            const n = parseInt(document.getElementById('topN').value) || 20;
+            const minAge = parseInt(document.getElementById('rankMinAge').value) || 25;
+            const maxAge = parseInt(document.getElementById('rankMaxAge').value) || 45;
+            const maxDistance = parseInt(document.getElementById('rankMaxDistance').value) || 50;
+            const mustNotSmoke = document.getElementById('rankNoSmoke').value === 'true';
+            
+            try {
+                const response = await fetch('/top', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        n: n,
+                        min_age: minAge,
+                        max_age: maxAge,
+                        max_distance_km: maxDistance,
+                        must_not_smoke: mustNotSmoke
+                    })
+                });
+                
+                const data = await response.json();
+                const profiles = data.profiles || [];
+                
+                if (profiles.length > 0) {
+                    container.innerHTML = '';
+                    profiles.forEach(profile => {
+                        const card = createRankedProfileCard(profile);
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = '<div class="loading">No profiles found. Load data first!</div>';
+                }
+            } catch (error) {
+                container.innerHTML = '<div class="loading">Error: ' + error.message + '</div>';
+            }
+        }
+        
+        function createRankedProfileCard(profile) {
+            const card = document.createElement('div');
+            card.className = 'profile-card';
+            
+            const rank = profile._rank || 0;
+            const score = profile._score || 0;
+            const bonuses = profile._bonuses || [];
+            const flags = profile._flags || [];
+            
+            // Create photo collage
+            const photos = profile.photo_urls || [];
+            let photoHtml = '';
+            if (photos.length === 0) {
+                photoHtml = '<img src="https://via.placeholder.com/320x280?text=No+Photo" class="profile-photo">';
+            } else if (photos.length === 1) {
+                photoHtml = `<img src="${photos[0]}" class="profile-photo" onerror="this.src='https://via.placeholder.com/320x280?text=No+Photo'">`;
+            } else {
+                const moreCount = photos.length > 3 ? photos.length - 3 : 0;
+                photoHtml = `
+                    <div class="photo-collage">
+                        <img src="${photos[0]}" class="main-photo" onerror="this.style.display='none'">
+                        <img src="${photos[1]}" class="side-photo" onerror="this.style.display='none'">
+                        ${photos.length > 2 
+                            ? (moreCount > 0 
+                                ? `<div class="side-photo more-photos">+${moreCount} more</div>`
+                                : `<img src="${photos[2]}" class="side-photo" onerror="this.style.display='none'">`)
+                            : '<div class="side-photo" style="background:#2a2a4a;"></div>'}
+                    </div>
+                `;
+            }
+            
+            const appBadge = profile.app_source === 'hinge' 
+                ? '<span style="background:#ff6b6b;padding:2px 6px;border-radius:4px;font-size:10px;margin-left:5px;">HINGE</span>' 
+                : '<span style="background:#ff7854;padding:2px 6px;border-radius:4px;font-size:10px;margin-left:5px;">TINDER</span>';
+            
+            const rankBadge = rank <= 3 
+                ? `<span style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;">#${rank}</span>`
+                : `<span style="background:#6366f1;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;">#${rank}</span>`;
+            
+            const scoreColor = score >= 100 ? '#22c55e' : score >= 80 ? '#eab308' : '#ef4444';
+            
+            card.innerHTML = `
+                ${photoHtml}
+                <div class="profile-body">
+                    <div class="profile-header">
+                        <span class="profile-name">${profile.name || 'Unknown'}, ${profile.age || '?'} ${appBadge}</span>
+                        ${rankBadge}
+                    </div>
+                    
+                    <div style="background:rgba(0,0,0,0.3);padding:8px 12px;border-radius:8px;margin-bottom:12px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <span style="color:#888;font-size:12px;">Match Score</span>
+                            <span style="color:${scoreColor};font-size:18px;font-weight:bold;">${score.toFixed(1)}</span>
+                        </div>
+                        ${bonuses.length > 0 ? `<div style="color:#86efac;font-size:11px;margin-top:4px;">${bonuses.slice(0,3).join(' | ')}</div>` : ''}
+                        ${flags.length > 0 ? `<div style="color:#fca5a5;font-size:11px;margin-top:2px;">${flags.join(' | ')}</div>` : ''}
+                    </div>
+                    
+                    <div class="profile-data">
+                        <div class="data-item">
+                            <div class="label">Distance</div>
+                            <div class="value">${profile.distance_km ? profile.distance_km.toFixed(0) + ' km' : 'Unknown'}</div>
+                        </div>
+                        <div class="data-item ${profile.verified ? 'good' : ''}">
+                            <div class="label">Verified</div>
+                            <div class="value">${profile.verified ? 'Yes' : 'No'}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="label">Job</div>
+                            <div class="value">${profile.occupation || 'Unknown'}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="label">Height</div>
+                            <div class="value">${profile.height_cm ? profile.height_cm + ' cm' : 'Unknown'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-bio">${profile.bio || ''}</div>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        function createProfileCard(profile) {
+            const card = document.createElement('div');
+            card.className = 'profile-card';
+            
+            // Check for flags
+            const flags = [];
+            const goods = [];
+            
+            // Age check
+            const ageOk = profile.age >= filterSettings.minAge && profile.age <= filterSettings.maxAge;
+            if (!ageOk) flags.push('age');
+            
+            // Distance check
+            const distanceOk = !profile.distance_km || profile.distance_km <= filterSettings.maxDistance;
+            if (!distanceOk) flags.push('distance');
+            
+            // Smoking check
+            const smokeOk = !filterSettings.mustNotSmoke || profile.lifestyle?.smokes !== 'yes';
+            if (!smokeOk) flags.push('smokes');
+            
+            // Verified check
+            const verifiedOk = !filterSettings.mustBeVerified || profile.verified;
+            if (profile.verified) goods.push('verified');
+            if (!verifiedOk) flags.push('verified');
+            
+            // If any flags, mark card
+            if (flags.length > 0) {
+                card.classList.add('flagged');
+            }
+            
+            const photos = profile.photo_urls || [];
+            const badgeClass = profile._type === 'match' ? 'badge-match' : 'badge-like';
+            const badgeText = profile._type === 'match' ? 'MATCH' : 'LIKES YOU';
+            const appBadge = profile.app_source === 'hinge' ? '<span style="background:#ff6b6b;padding:2px 6px;border-radius:4px;font-size:10px;margin-left:5px;">HINGE</span>' : '<span style="background:#ff7854;padding:2px 6px;border-radius:4px;font-size:10px;margin-left:5px;">TINDER</span>';
+            
+            // Create photo collage HTML
+            let photoHtml = '';
+            if (photos.length === 0) {
+                photoHtml = '<img src="https://via.placeholder.com/320x280?text=No+Photo" class="profile-photo">';
+            } else if (photos.length === 1) {
+                photoHtml = `<img src="${photos[0]}" alt="${profile.name}" class="profile-photo" onerror="this.src='https://via.placeholder.com/320x280?text=No+Photo'">`;
+            } else {
+                const moreCount = photos.length > 3 ? photos.length - 3 : 0;
+                photoHtml = `
+                    <div class="photo-collage">
+                        <img src="${photos[0]}" alt="${profile.name}" class="main-photo" onerror="this.style.display='none'">
+                        <img src="${photos[1]}" alt="" class="side-photo" onerror="this.style.display='none'">
+                        ${photos.length > 2 
+                            ? (moreCount > 0 
+                                ? `<div class="side-photo more-photos">+${moreCount} more</div>`
+                                : `<img src="${photos[2]}" alt="" class="side-photo" onerror="this.style.display='none'">`)
+                            : '<div class="side-photo" style="background:#2a2a4a;"></div>'}
+                    </div>
+                `;
+            }
+            
+            card.innerHTML = `
+                ${photoHtml}
+                <div class="profile-body">
+                    <div class="profile-header">
+                        <span class="profile-name">${profile.name || 'Unknown'}, ${profile.age || '?'} ${appBadge}</span>
+                        <span class="profile-badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                    
+                    <div class="profile-data">
+                        <div class="data-item ${!ageOk ? 'flagged' : ''}">
+                            <div class="label">Age</div>
+                            <div class="value">${profile.age || 'Unknown'}</div>
+                        </div>
+                        <div class="data-item ${!distanceOk ? 'flagged' : ''}">
+                            <div class="label">Distance</div>
+                            <div class="value">${profile.distance_km ? profile.distance_km + ' km' : 'Unknown'}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="label">Location</div>
+                            <div class="value">${profile.location || 'Unknown'}</div>
+                        </div>
+                        <div class="data-item ${profile.verified ? 'good' : ''}">
+                            <div class="label">Verified</div>
+                            <div class="value">${profile.verified ? 'Yes' : 'No'}</div>
+                        </div>
+                        <div class="data-item ${!smokeOk ? 'flagged' : ''}">
+                            <div class="label">Smokes</div>
+                            <div class="value">${profile.lifestyle?.smokes || 'Unknown'}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="label">Drinks</div>
+                            <div class="value">${profile.lifestyle?.drinks || 'Unknown'}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="label">Job</div>
+                            <div class="value">${profile.occupation || 'Unknown'}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="label">Education</div>
+                            <div class="value">${profile.education || 'Unknown'}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="label">Ethnicity</div>
+                            <div class="value">${profile.ethnicity || 'Unknown'}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="label">Height</div>
+                            <div class="value">${profile.height_cm ? profile.height_cm + ' cm' : 'Unknown'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-bio">${profile.bio || ''}</div>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // Hinge Auth functions
+        let hingeOtpId = null;
+        
+        async function requestHingeOTP() {
+            const phone = document.getElementById('phoneNumber').value;
+            const btn = document.getElementById('hingeRequestBtn');
+            
+            if (!phone) {
+                showStatus('hingeAuthStatus', 'Please enter a phone number', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Requesting...';
+            
+            try {
+                const response = await fetch('/hinge/request-otp', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({phone: phone})
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    hingeOtpId = data.otp_id;
+                    document.getElementById('hingeAuthForm').classList.add('hidden');
+                    document.getElementById('hingeOtpForm').classList.remove('hidden');
+                    showStatus('hingeAuthStatus', 'SMS code sent! Check your phone.', 'success');
+                } else {
+                    showStatus('hingeAuthStatus', 'Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('hingeAuthStatus', 'Network error: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Request SMS Code';
+            }
+        }
+        
+        async function verifyHingeOTP() {
+            const code = document.getElementById('otpCode').value;
+            const btn = document.getElementById('hingeVerifyBtn');
+            
+            if (!code || code.length !== 6) {
+                showStatus('hingeAuthStatus', 'Please enter a 6-digit code', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+            
+            try {
+                const response = await fetch('/hinge/verify-otp', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({otp_id: hingeOtpId, code: code})
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showStatus('hingeAuthStatus', 'Hinge authenticated! User ID: ' + data.user_id, 'success');
+                    document.getElementById('hingeOtpForm').classList.add('hidden');
+                } else {
+                    showStatus('hingeAuthStatus', 'Verification failed: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('hingeAuthStatus', 'Network error: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Verify';
+            }
+        }
+        
+        function saveTinderToken() {
+            const token = document.getElementById('tinderToken').value;
+            if (token) {
+                localStorage.setItem('tinderToken', token);
+                alert('Token saved! Use it in tinder_fetcher_v2.py');
+            }
+        }
+        
+        function saveSettings() {
+            filterSettings = {
+                minAge: parseInt(document.getElementById('settingMinAge').value) || 18,
+                maxAge: parseInt(document.getElementById('settingMaxAge').value) || 100,
+                maxDistance: parseInt(document.getElementById('settingMaxDistance').value) || 100,
+                mustNotSmoke: document.getElementById('settingNoSmoke').value === 'true',
+                mustNotUseDrugs: document.getElementById('settingNoDrugs').value === 'true',
+                mustBeVerified: document.getElementById('settingVerified').value === 'true'
+            };
+            localStorage.setItem('filterSettings', JSON.stringify(filterSettings));
+            alert('Settings saved!');
+        }
+        
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>

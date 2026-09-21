@@ -1,0 +1,251 @@
+Dating Apps Orchestrator - Complete File Structure
+
+dating-agent/
+|
++-- README.md                      (Project overview)
++-- QUICKSTART.md                  (10-minute setup)
++-- SETUP.md                       (Detailed setup)
++-- ARCHITECTURE.md                (System design)
++-- IMPLEMENTATION_GUIDE.md        (Scraper instructions)
++-- PROJECT_SUMMARY.md             (What you got)
++-- FILE_TREE.txt                  (This file)
++-- config.example.yaml            (Config template)
++-- docker-compose.yml             (Docker setup)
++-- .gitignore                     (Git ignore rules)
+|
++-- backend/
+|   |
+|   +-- __init__.py
+|   +-- api.py                     (Flask REST API - 350 lines)
+|   +-- orchestrator.py            (Main agent logic - 320 lines)
+|   +-- requirements.txt           (Python dependencies)
+|   |
+|   +-- models/
+|   |   +-- __init__.py
+|   |   +-- profile.py             (Unified profile schema - 180 lines)
+|   |
+|   +-- filtering/
+|   |   +-- __init__.py
+|   |   +-- filter_engine.py       (Strict filtering - 280 lines)
+|   |   +-- clip_matcher.py        (CLIP image matching - 280 lines)
+|   |
+|   +-- scrapers/
+|       +-- __init__.py
+|       +-- base_scraper.py        (Scraper stubs - 200 lines)
+|
++-- frontend/
+    |
+    +-- package.json               (Dependencies)
+    +-- index.html                 (Entry point)
+    +-- tsconfig.json              (TypeScript config)
+    +-- vite.config.ts             (Build config)
+    +-- tailwind.config.js         (Styling config)
+    |
+    +-- src/
+        |
+        +-- main.tsx               (React entry)
+        +-- App.tsx                (Main app - 170 lines)
+        +-- App.css                (Global styles)
+        |
+        +-- components/
+            |
+            +-- index.ts           (Component exports)
+            +-- MutualMatches.tsx   (Mutual matches view - 55 lines)
+            +-- NewLikes.tsx        (Incoming likes view - 75 lines)
+            +-- ProfileCard.tsx     (Profile card component - 100 lines)
+            +-- FilterPanel.tsx     (Settings panel - 130 lines)
+            +-- Dashboard.tsx       (Dashboard view - 200 lines)
+
+
+STATISTICS
+==========
+
+Backend Code
+  - orchestrator.py:     320 lines (Core logic)
+  - api.py:             350 lines (REST endpoints)
+  - filter_engine.py:   280 lines (Filtering)
+  - clip_matcher.py:    280 lines (Image matching)
+  - profile.py:         180 lines (Data model)
+  - base_scraper.py:    200 lines (Scraper stubs)
+  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Total Backend:      ~1,600 lines
+
+Frontend Code
+  - App.tsx:           170 lines (Main shell)
+  - Dashboard.tsx:     200 lines (Dashboard)
+  - FilterPanel.tsx:   130 lines (Settings)
+  - MutualMatches.tsx: 55 lines (View)
+  - NewLikes.tsx:      75 lines (View)
+  - ProfileCard.tsx:   100 lines (Component)
+  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Total Frontend:     ~730 lines
+
+Configuration & Docs
+  - README.md:         Detailed project info
+  - QUICKSTART.md:     10-minute setup
+  - SETUP.md:          Detailed setup & auth
+  - ARCHITECTURE.md:   System design
+  - IMPLEMENTATION_GUIDE.md: Scraper code examples
+  - PROJECT_SUMMARY.md: What you got
+  - config.example.yaml: Config template
+  - docker-compose.yml: Docker setup
+
+TOTAL PROJECT:       ~2,500 lines of code + documentation
+
+
+KEY FILES
+=========
+
+Core Logic
+  - orchestrator.py       Main agent coordinating all operations
+  - api.py               Flask API with 12 endpoints
+  - filter_engine.py     Strict filtering with 8 filter checks
+
+Matching
+  - clip_matcher.py      CLIP-based image similarity
+  - profile.py           Unified profile schema
+
+Data Fetching (Stubs)
+  - base_scraper.py      Base classes for Tinder, Hinge, Match scrapers
+
+UI Components
+  - App.tsx             Main app with tab navigation
+  - Dashboard.tsx       Home page with stats & actions
+  - MutualMatches.tsx   View for mutual matches
+  - NewLikes.tsx        View for incoming likes
+  - FilterPanel.tsx     Configuration form
+  - ProfileCard.tsx     Reusable profile card component
+
+Configuration
+  - package.json        React dependencies
+  - requirements.txt    Python dependencies
+  - vite.config.ts      Frontend build config
+  - tailwind.config.js  Tailwind CSS config
+  - config.example.yaml Template for app settings
+
+
+WHAT YOU NEED TO ADD
+====================
+
+1. Real Scraper Implementations
+   - Replace stub methods in backend/scrapers/base_scraper.py
+   - Follow IMPLEMENTATION_GUIDE.md for code examples
+   - Need actual API calls to Tinder, Hinge, Match
+
+2. Authentication Tokens
+   - Get tokens from each dating app
+   - Pass to /authenticate endpoint
+
+3. Database (Optional)
+   - Add PostgreSQL/MongoDB for persistence
+   - Currently uses in-memory storage
+
+4. Deployment (Optional)
+   - Use docker-compose.yml to containerize
+   - Deploy to Heroku, Railway, Render, etc.
+
+
+RUNNING THE PROJECT
+===================
+
+Backend:
+  cd backend
+  python -m venv venv
+  source venv/bin/activate  (Windows: venv\Scripts\activate)
+  pip install -r requirements.txt
+  python api.py
+
+Frontend:
+  cd frontend
+  npm install
+  npm run dev
+
+Then open http://localhost:3000
+
+
+ARCHITECTURE OVERVIEW
+====================
+
+User Interface (React)
+  └── API Layer (Flask)
+        └── Orchestrator (Main Agent)
+              ├── Filter Engine (Strict Matching)
+              ├── CLIP Matcher (Image Similarity)
+              └── Scrapers (Data Fetching)
+                    ├── Tinder
+                    ├── Hinge
+                    └── Match
+
+
+API ENDPOINTS
+=============
+
+GET  /health                    Health check
+POST /init                      Initialize with filters
+POST /authenticate              Login to dating apps
+POST /sync                      Fetch data from apps
+GET  /stats                     Get statistics
+GET  /matches/mutual            Get mutual matches
+GET  /matches/incoming          Get incoming likes
+POST /filter-and-rank           Apply filters
+POST /search/by-description     CLIP-based search
+POST /refresh                   Check for new data
+GET  /profile/<app>/<id>        Get specific profile
+GET  /export/mutual-matches     Export as JSON
+
+
+TECH STACK
+==========
+
+Backend
+  - Python 3.10+
+  - Flask 3.0 (Web framework)
+  - NumPy (Numerical computing)
+  - Pillow (Image processing)
+  - OpenAI CLIP (Image matching)
+  - PyTorch (ML backend)
+
+Frontend
+  - React 18 (UI framework)
+  - TypeScript (Type safety)
+  - Vite (Build tool)
+  - Tailwind CSS (Styling)
+  - Axios (HTTP client)
+  - Lucide React (Icons)
+
+Infrastructure
+  - Local development: Flask dev server
+  - Optional: Docker + docker-compose
+  - No database (in-memory for local use)
+
+
+NEXT STEPS
+==========
+
+1. Read QUICKSTART.md for 10-minute setup
+2. Run the project locally
+3. Read ARCHITECTURE.md to understand design
+4. Read IMPLEMENTATION_GUIDE.md to build real scrapers
+5. Customize filters and features
+6. Deploy if desired
+
+
+QUESTIONS?
+==========
+
+See:
+  - QUICKSTART.md for common issues
+  - SETUP.md for detailed setup
+  - ARCHITECTURE.md for design details
+  - IMPLEMENTATION_GUIDE.md for scraper code
+  - Check comments in source code for details
+
+
+ENJOY!
+======
+
+You now have a complete dating apps orchestrator.
+Take control of your dating experience!
+
+- Fluffy, your loyal digital puppy
+
